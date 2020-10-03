@@ -29,7 +29,7 @@ import {
 import firestore from '@react-native-firebase/firestore';
 import { firebase } from '@react-native-firebase/auth';
 import ImagePicker from 'react-native-image-crop-picker';
-//import RNFetchBlob from 'rn-fetch-blob';
+import RNFetchBlob from 'rn-fetch-blob';
 //import GooglePlacesAutoComplete from 'react-native-google-places-autocomplete';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 //import Geocoder from 'react-native-geocoder-reborn';
@@ -40,10 +40,9 @@ import { request, PERMISSIONS } from 'react-native-permissions';
 import AddButton from '../../component/addbtn';
 import PropTypes from 'prop-types';
 const SIZE = 80;
-// const Blob = RNFetchBlob.polyfill.Blob
-// const fs = RNFetchBlob.fs;
-// window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest
-// window.Blob = Blob;
+
+
+
 
 export default class UploadJob extends Component {
     constructor() {
@@ -279,30 +278,65 @@ export default class UploadJob extends Component {
 
     //Upload image to Firebase storage
     uploadImage() {
+        console.log("Upload Image tested");
+        const Blob = RNFetchBlob.polyfill.Blob
+        const fs = RNFetchBlob.fs;
+        console.log("Setup XMLHttpRequest");
+        window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest
+        console.log("Setup_Blob");
+        window.Blob = Blob;
+
+
 
         return new Promise((resolve, reject) => {
             let uploadBlob = null;
             const appendIDToImage = new Date().getTime();
             const imageRef = storage.ref('thumbnails_job').child(`${appendIDToImage}`);
-
+            console.log('Start fs.readfile');
             fs.readFile(this.state.url, 'base64')
                 .then((data) => {
+                    console.log('Data Blob 1');
                     return Blob.build(data, { type: `${this.state.imageType};BASE64` })
                 })
                 .then((blob) => {
+                    console.log('Data Blob 2');
                     uploadBlob = blob
-                    return imageRef.put(blob, { contentType: this.state.imageType })
+                    console.log('Start Upload');
+                    //let ref = imageRef.put(blob, { contentType: this.state.imageType })
+                    //uploadBlob.close();
+                    //console.log('End Upload');
+                    // return ref;
+
+                    let url = null;
+                    imageRef.put(blob, { contentType: this.state.imageType }).then(() => {
+                        console.log(imageRef);
+                        url = imageRef.getDownloadURL();
+                        console.log('complete upload url=' + url);
+                        console.log('URL Captured');
+                        resolve(url)
+                        console.log(url)
+                        this.dbRef.doc(this).update({ url: url })
+
+                    }).catch((error) => {
+                        console.log("Error = " + error);
+                        reject(error)
+                    })
+                    //return url;
+
                 })
-                .then(() => {
-                    uploadBlob.close()
-                    return imageRef.getDownloadURL()
-                })
-                .then((url) => {
-                    resolve(url)
-                    console.log(url)
-                    this.dbRef.doc(this).update({ url: url })
-                })
+                // .then(() => {
+                //     console.log('Data Blob 3');
+                //     //uploadBlob.close()
+                //     return imageRef.getDownloadURL()
+                // })
+                // .then((url) => {
+                //     console.log('URL Captured');
+                //     resolve(url)
+                //     console.log(url)
+                //     this.dbRef.doc(this).update({ url: url })
+                // })
                 .catch((error) => {
+                    console.log("Error = " + error);
                     reject(error)
                 })
         })
@@ -339,7 +373,7 @@ export default class UploadJob extends Component {
                             salary: '',
                             url: '',
                             peoplenum: '',
-                             time: 0,
+                            time: 0,
                             location: '',
                         })
                     });
