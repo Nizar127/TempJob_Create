@@ -66,6 +66,8 @@ export default class Profile extends Component {
         //firebase.firestore().collection('Users').doc(user.uid).set(user).collection('Job_Creator');
         this.state = {
             users: [],
+            project: [],
+            keyplayers: [],
             username: '',
             key: '',
             phonenumber: '',
@@ -84,7 +86,7 @@ export default class Profile extends Component {
             lng: 0,
             location: '',
             show: true,
-            project: '',
+            //project: '',
             //listViewData: data,
             newContact: "",
             mytext: '',
@@ -98,34 +100,24 @@ export default class Profile extends Component {
     }
 
     componentDidMount() {
-        this.unsubscribe = firebase.firestore().collection('Users').onSnapshot(this.getCollection);
+        this.unsubscribe = firebase.firestore().collection('Users').doc(auth().currentUser.uid).onSnapshot(doc => {
+            console.log(doc);
+            const { username, phonenumber, profileImage, description, keyplayers, project } = doc.data();
+            this.setState({
+                username,
+                description,
+                project,
+                keyplayers
+            })
+        });
+        //this.unsubscribe = firebase.firestore().collection('Users').onSnapshot(this.getCollection);
     }
 
     componentWillUnmount() {
         this.unsubscribe();
     }
 
-    //get the data first
-    getCollection = (querySnapshot) => {
-        const users = [];
-        querySnapshot.forEach((res) => {
-            const { username, phonenumber, profileImage, description, keyplayer, project } = res.data();
-            users.push({
-                key: res.id,
-                res,
-                username,
-                phonenumber,
-                profileImage,
-                description,
-                keyplayer,
-                project,
-            });
-        });
-        this.setState({
-            users,
-            isLoading: false
-        })
-    }
+
 
     setModalVisible = (bool) => {
         this.setState({ isModalVisible: bool })
@@ -198,7 +190,7 @@ export default class Profile extends Component {
                         </CardItem>
                         <CardItem>
                             <Body>
-                                <Text style={{ fontSize: 20, fontWeight: 'bold', justifyContent: 'center' }}>{auth().currentUser.displayName}</Text>
+                                <Text style={{ fontSize: 20, fontWeight: 'bold', justifyContent: 'center' }}>{this.state.username ? this.state.username : auth().currentUser.displayName}</Text>
                             </Body>
                         </CardItem>
 
@@ -220,7 +212,7 @@ export default class Profile extends Component {
                         </CardItem>
                         <CardItem cardBody bordered button>
                             <Body>
-                                <Text style={{ margin: 30 }}></Text>
+                                <Text style={{ margin: 30 }}>{this.state.description}</Text>
 
                             </Body>
                         </CardItem>
@@ -232,6 +224,16 @@ export default class Profile extends Component {
                         </CardItem>
                         <CardItem cardBody>
                             <Content>
+                                {
+                                    this.state.project &&
+                                    this.state.project.map((p, i) => (
+                                        <ListItem key={i}>
+                                            <Text>
+                                                {p}
+                                            </Text>
+                                        </ListItem>
+                                    ))
+                                }
                                 <Separator>
                                     <Text style={{ fontSize: 16 }} onPress={this.setText}>Government</Text>
                                 </Separator>
@@ -276,6 +278,21 @@ export default class Profile extends Component {
                         <Text>Key Player</Text>
                     </CardItem>
                     <ScrollView horizontal={true} >
+
+                        {
+                            this.state.keyplayers &&
+                            this.state.keyplayers.map((p, i) => (
+                                <Card style={styles.keyplayer}>
+                                    <CardItem style={{ flex: 1, flexDirection: 'column' }}>
+                                        <Thumbnail large source={require('../../img/dude.jpg')} style={{ padding: 10 }} />
+                                        <Text>{p.name}</Text>
+                                    </CardItem>
+                                    <CardItem cardBody>
+                                        <Text>{p.role}</Text>
+                                    </CardItem>
+                                </Card>
+                            ))
+                        }
 
                         <Card style={styles.keyplayer}>
                             <CardItem style={{ flex: 1, flexDirection: 'column' }}>

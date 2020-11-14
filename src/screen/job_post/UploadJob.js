@@ -26,6 +26,7 @@ import {
 } from 'native-base';
 //import { addJob, addApplicant } from '../../service/DataService';
 //import Icon from 'react-native-vector-icons/Ionicons';
+import storage from '@react-native-firebase/storage';
 import firestore from '@react-native-firebase/firestore';
 import { firebase } from '@react-native-firebase/auth';
 import ImagePicker from 'react-native-image-crop-picker';
@@ -34,13 +35,14 @@ import RNFetchBlob from 'rn-fetch-blob';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 //import Geocoder from 'react-native-geocoder-reborn';
 import Geolocation from '@react-native-community/geolocation';
-//import storage from '@react-native-firebase/storage';
-import { storage } from '../../config/firebase'
 import { request, PERMISSIONS } from 'react-native-permissions';
 import AddButton from '../../component/addbtn';
 import PropTypes from 'prop-types';
 const SIZE = 80;
+//const storageRef = storage().ref('thumbnails_job').child(`${appendIDToImage}`);
 
+// [anas]
+import ImgToBase64 from 'react-native-image-base64';
 
 
 
@@ -277,70 +279,49 @@ export default class UploadJob extends Component {
     }
 
     //Upload image to Firebase storage
+    //Upload image to Firebase storage
     uploadImage() {
-        console.log("Upload Image tested");
-        const Blob = RNFetchBlob.polyfill.Blob
-        const fs = RNFetchBlob.fs;
-        console.log("Setup XMLHttpRequest");
-        window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest
-        console.log("Setup_Blob");
-        window.Blob = Blob;
-
-
-
         return new Promise((resolve, reject) => {
-            let uploadBlob = null;
             const appendIDToImage = new Date().getTime();
-            const imageRef = storage.ref('thumbnails_job').child(`${appendIDToImage}`);
-            console.log('Start fs.readfile');
-            fs.readFile(this.state.url, 'base64')
-                .then((data) => {
-                    console.log('Data Blob 1');
-                    return Blob.build(data, { type: `${this.state.imageType};BASE64` })
-                })
-                .then((blob) => {
-                    console.log('Data Blob 2');
-                    uploadBlob = blob
-                    console.log('Start Upload');
-                    //let ref = imageRef.put(blob, { contentType: this.state.imageType })
-                    //uploadBlob.close();
-                    //console.log('End Upload');
-                    // return ref;
+            const storageRef = storage().ref('thumbnails_job').child(`${appendIDToImage}`);
 
-                    let url = null;
-                    imageRef.put(blob, { contentType: this.state.imageType }).then(() => {
-                        console.log(imageRef);
-                        url = imageRef.getDownloadURL();
-                        console.log('complete upload url=' + url);
-                        console.log('URL Captured');
-                        resolve(url)
-                        console.log(url)
-                        this.dbRef.doc(this).update({ url: url })
+            // [anas]
+            const task = ImgToBase64.getBase64String(this.state.url)
+                .then(base64String => {
+                    console.log("[uploadImage] Start upload image to firebase storage");
+                    console.log("[uploadImage] base64String", !!base64String);
 
-                    }).catch((error) => {
-                        console.log("Error = " + error);
-                        reject(error)
-                    })
-                    //return url;
+                    // .put accept blob, putString accept string
+                    // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#put
+                    storageRef.putString(base64String, 'base64')
+                        .then((imageSnapshot) => {
+                            console.log('[uploadImage] Image Upload Successfully');
 
-                })
-                // .then(() => {
-                //     console.log('Data Blob 3');
-                //     //uploadBlob.close()
-                //     return imageRef.getDownloadURL()
-                // })
-                // .then((url) => {
-                //     console.log('URL Captured');
-                //     resolve(url)
-                //     console.log(url)
-                //     this.dbRef.doc(this).update({ url: url })
-                // })
-                .catch((error) => {
-                    console.log("Error = " + error);
-                    reject(error)
-                })
-        })
+                            storage()
+                                .ref(imageSnapshot.metadata.fullPath)
+                                .getDownloadURL()
+                                .then((downloadURL) => {
+                                    console.log("[uploadImage] downloadURL", downloadURL);
+                                    // setAllImages((allImages) => [...allImages, downloadURL]);
+                                    //this.dbRef.doc(this).update({ imageURL: downloadURL });
+                                    resolve(downloadURL);
+                                });
+
+                        }).catch(e => {
+                            console.error("[uploadImage] Put storageRef failed");
+                            console.error(e);
+                            reject("");
+                        });
+
+                }).catch(e => {
+                    console.error("[uploadImage] Get base 64 string failed");
+                    console.error(e);
+                    reject("");
+                });
+        });
     }
+
+
 
     saveData = () => {
         console.log("state", this.state)
@@ -350,6 +331,9 @@ export default class UploadJob extends Component {
             }
             else {
                 this.uploadImage().then(firebaseUrl => {
+                    console.log("[saveData] firebaseUrl", firebaseUrl);
+                    console.log("[saveData] Start add to firebase");
+
                     this.dbRef.add({
                         uid: this.state.userID,
                         jobCreatorName: this.state.jobCreatorName,
@@ -365,6 +349,8 @@ export default class UploadJob extends Component {
                         chosenDate: this.state.date,
                         location: this.state.location,
                     }).then((res) => {
+                        console.log("[saveData] Done add to firebase");
+
                         this.setState({
                             jobname: '',
                             uniqueId: '',
@@ -389,9 +375,10 @@ export default class UploadJob extends Component {
                             }
                         ], { cancelable: false }
                     );
-                })
-
-
+                }).catch(e => {
+                    console.error("[saveData] Upload image failed");
+                    console.error(e);
+                });
             }
         } else {
             Alert.alert('Status', 'Empty Field(s)!');
@@ -550,7 +537,7 @@ export default class UploadJob extends Component {
 
                         <Item style={styles.inputGroup} fixedLabel last>
                             <Label>Salary</Label>
-                            <Input style={styles.startRouteBtn} onChangeText={this.setSalary} />
+                            <Input style={styles.startRouteBtn} onChangeText={this.setSalary} type="number" />
                         </Item>
 
                         <Item style={styles.inputGroup} fixedLabel last>
@@ -594,7 +581,12 @@ export default class UploadJob extends Component {
 }
 
 const styles = StyleSheet.create({
-
+    closeText: {
+        fontSize: 25,
+        color: '#00479e',
+        textAlign: 'center',
+        marginTop: 10
+    },
     startRouteBtn: {
         backgroundColor: 'white',
         width: 250,

@@ -45,6 +45,9 @@ export default class Keyplayer extends Component {
             users: [],
             textInput: [],
             inputData: [],
+            keyplayers: [],
+            inputDataName: [],
+            inputDataRole: [],
             username: '',
             phonenumber: '',
             profileImage: '',
@@ -112,10 +115,10 @@ export default class Keyplayer extends Component {
                                 <Text style={{ textAlign: 'center' }}>Change Thumbnail</Text>
                             </Button>
                             <Thumbnail large source={{ uri: this.state.url }} style={{ height: 200, width: null, flex: 1, padding: 10 }} />
-                            <TextInput style={styles.startRouteBtn} placeholder="Name of your keyplayer" onChangeText={(text) => this.addValues(text, index)} />
+                            <TextInput style={styles.startRouteBtn} placeholder="Name of your keyplayer" onChangeText={(text) => this.addValuesName(text, index)} />
                         </CardItem>
                         <CardItem cardBody>
-                            <TextInput style={styles.startRouteBtn} placeholder="Role of your keyplayer" onChangeText={(text) => this.addValues(text, index)} />
+                            <TextInput style={styles.startRouteBtn} placeholder="Role of your keyplayer" onChangeText={(text) => this.addValuesRole(text, index)} />
                         </CardItem>
                     </Card>
 
@@ -136,8 +139,8 @@ export default class Keyplayer extends Component {
     }
 
     //function to add text from TextInputs into single array
-    addValues = (text, index) => {
-        let dataArray = this.state.inputData;
+    addValuesName = (text, index) => {
+        let dataArray = this.state.inputDataName;
         let checkBool = false;
         if (dataArray.length !== 0) {
             dataArray.forEach(element => {
@@ -149,13 +152,37 @@ export default class Keyplayer extends Component {
         }
         if (checkBool) {
             this.setState({
-                inputData: dataArray
+                inputDataName: dataArray
             });
         }
         else {
             dataArray.push({ 'text': text, 'index': index });
             this.setState({
-                inputData: dataArray
+                inputDataName: dataArray
+            });
+        }
+    }
+
+    addValuesRole = (text, index) => {
+        let dataArray = this.state.inputDataRole;
+        let checkBool = false;
+        if (dataArray.length !== 0) {
+            dataArray.forEach(element => {
+                if (element.index === index) {
+                    element.text = text;
+                    checkBool = true;
+                }
+            });
+        }
+        if (checkBool) {
+            this.setState({
+                inputDataRole: dataArray
+            });
+        }
+        else {
+            dataArray.push({ 'text': text, 'index': index });
+            this.setState({
+                inputDataRole: dataArray
             });
         }
     }
@@ -174,22 +201,23 @@ export default class Keyplayer extends Component {
 
     updateUser = () => {
 
-        const updateDBRef = firebase.firestore().collection('Users').doc(this.state.key);
-        updateDBRef.set({
-            username: this.state.usernamename,
-            profileimage: this.state.profileImage,
-            description: this.state.description,
-            keyplayer: this.state.keyplayer,
-            project: this.state.project
-        }).then((docRef) => {
-            this.setState({
-                key: '',
-                username: '',
-                profileImage: '',
-                description: '',
-                keyplayer: '',
-                project: ''
+        let keyplayers = [];
+        for (let index = 0; index < this.state.inputDataName.length; index++) {
+            const elementName = this.state.inputDataName[index];
+            const elementRole = this.state.inputDataRole[index];
+            keyplayers.push({
+                name: elementName.text, role: elementRole.text
             });
+
+        }
+        console.log('keyplayers', keyplayers);
+
+
+        const updateDBRef = firebase.firestore().collection('Users').doc(auth().currentUser.uid);
+        updateDBRef.update({
+            keyplayers: keyplayers
+        }).then((docRef) => {
+
             this.props.navigation.navigate('Profile');
         })
 
@@ -217,12 +245,12 @@ export default class Keyplayer extends Component {
                         <CardItem cardBody>
                             <Content>
                                 <View style={styles.inputGroup}>
-                                    <TextInput
+                                    {/* <TextInput
                                         placeholder={'Notable Project'}
                                         value={this.state.project}
                                         style={styles.startRouteBtn}
                                         onChangeText={(val) => this.inputValueUpdate(val, 'project')}
-                                    />
+                                    /> */}
                                     <Icon android name="md-add" size={30} onPress={() => this.addTextInput(this.state.textInput.length)} />
                                     {this.state.textInput.map((value) => {
                                         return value
@@ -240,7 +268,7 @@ export default class Keyplayer extends Component {
 
                     <Card>
 
-                        <Button block success last style={{ marginTop: 20, marginBottom: 5 }} onPress={() => this.updateUser}>
+                        <Button block success last style={{ marginTop: 20, marginBottom: 5 }} onPress={() => this.updateUser()}>
                             <Text>Update</Text>
                         </Button>
                     </Card>

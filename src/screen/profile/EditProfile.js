@@ -156,22 +156,30 @@ export default class EditProfile extends Component {
 
     updateUser = () => {
 
-        const updateDBRef = firebase.firestore().collection('Users').doc(this.state.key);
-        updateDBRef.set({
-            username: this.state.usernamename,
+        let projects = [this.state.project];
+        for (let index = 0; index < this.state.inputData.length; index++) {
+            const element = this.state.inputData[index];
+            projects.push(element.text);
+
+        }
+        console.log('projects', projects);
+
+        const updateDBRef = firebase.firestore().collection('Users').doc(auth().currentUser.uid);
+        updateDBRef.update({
+            username: this.state.username,
             profileimage: this.state.profileImage,
             description: this.state.description,
             keyplayer: this.state.keyplayer,
-            project: this.state.project
+            project: projects
         }).then((docRef) => {
-            this.setState({
-                key: '',
-                username: '',
-                profileImage: '',
-                description: '',
-                keyplayer: '',
-                project: ''
-            });
+            // this.setState({
+            //     key: '',
+            //     username: '',
+            //     profileImage: '',
+            //     description: '',
+            //     keyplayer: '',
+            //     projects: ''
+            // });
             this.props.navigation.navigate('Profile');
         })
 
@@ -283,7 +291,7 @@ export default class EditProfile extends Component {
 
                     <Card>
 
-                        <Button block success last style={{ marginTop: 20, marginBottom: 5 }} onPress={() => this.updateUser}>
+                        <Button block success last style={{ marginTop: 20, marginBottom: 5 }} onPress={() => this.updateUser()}>
                             <Text style={{ fontWeight: "bold", fontSize: 17, padding: 10 }}>Update</Text>
                         </Button>
                     </Card>
