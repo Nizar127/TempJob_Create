@@ -4,6 +4,7 @@ import {
     UIManager, Animated,
     LayoutAnimation, TextInput, Modal, TouchableHighlight
 } from 'react-native';
+import ImagePicker from 'react-native-image-crop-picker';
 import {
     Container,
     Header,
@@ -30,6 +31,8 @@ import auth from '@react-native-firebase/auth';
 //import firebase from '@react-native-firebase/app';
 import firestore from '@react-native-firebase/firestore';
 import { firebase } from '@react-native-firebase/auth';
+import storage from '@react-native-firebase/storage';
+import ImgToBase64 from 'react-native-image-base64'
 import { Alert } from 'react-native';
 
 console.disableYellowBox = true;
@@ -68,6 +71,9 @@ export default class EditProfile extends Component {
 
 
         };
+        this.pickImage = this.pickImage.bind(this);
+        this.uploadImage = this.uploadImage.bind(this);
+        this.updateUser = this.updateUser.bind(this);
 
     }
 
@@ -154,6 +160,68 @@ export default class EditProfile extends Component {
         this.setState(state);
     }
 
+
+    //Pick Image from camera or library
+    pickImage() {
+        ImagePicker.openPicker({
+            width: 300,
+            height: 180,
+            cropping: true
+        }).then(image => {
+            console.log(image, 'image')
+            this.setState({
+                url: image.path,
+                imageType: image.mime
+
+            })
+        }).catch((error) => {
+            console.log(error)
+        })
+    }
+
+
+    uploadImage() {
+        return new Promise((resolve, reject) => {
+            const appendIDToImage = new Date().getTime();
+            const storageRef = storage().ref('thumbnails_job').child(`${appendIDToImage}`);
+
+            // [anas]
+            const task = ImgToBase64.getBase64String(this.state.url)
+                .then(base64String => {
+                    console.log("[uploadImage] Start upload image to firebase storage");
+                    console.log("[uploadImage] base64String", !!base64String);
+
+                    // .put accept blob, putString accept string
+                    // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#put
+                    storageRef.putString(base64String, 'base64')
+                        .then((imageSnapshot) => {
+                            console.log('[uploadImage] Image Upload Successfully');
+
+                            storage()
+                                .ref(imageSnapshot.metadata.fullPath)
+                                .getDownloadURL()
+                                .then((downloadURL) => {
+                                    console.log("[uploadImage] downloadURL", downloadURL);
+                                    // setAllImages((allImages) => [...allImages, downloadURL]);
+                                    //this.dbRef.doc(this).update({ imageURL: downloadURL });
+                                    resolve(downloadURL);
+                                });
+
+                        }).catch(e => {
+                            console.error("[uploadImage] Put storageRef failed");
+                            console.error(e);
+                            reject("");
+                        });
+
+                }).catch(e => {
+                    console.error("[uploadImage] Get base 64 string failed");
+                    console.error(e);
+                    reject("");
+                });
+        });
+    }
+
+
     updateUser = () => {
 
         let projects = [this.state.project];
@@ -165,22 +233,29 @@ export default class EditProfile extends Component {
         console.log('projects', projects);
 
         const updateDBRef = firebase.firestore().collection('Users').doc(auth().currentUser.uid);
-        updateDBRef.update({
-            username: this.state.username,
-            profileimage: this.state.profileImage,
-            description: this.state.description,
-            keyplayer: this.state.keyplayer,
-            project: projects
-        }).then((docRef) => {
-            // this.setState({
-            //     key: '',
-            //     username: '',
-            //     profileImage: '',
-            //     description: '',
-            //     keyplayer: '',
-            //     projects: ''
-            // });
-            this.props.navigation.navigate('Profile');
+
+        this.uploadImage().then(firebaseUrl => {
+            console.log("[saveData] firebaseUrl", firebaseUrl);
+            console.log("[saveData] Start add to firebase");
+
+            updateDBRef.update({
+                username: this.state.username,
+                profileimage: this.state.profileImage,
+                description: this.state.description,
+                keyplayer: this.state.keyplayer,
+                project: projects,
+                url: firebaseUrl
+            }).then((docRef) => {
+                // this.setState({
+                //     key: '',
+                //     username: '',
+                //     profileImage: '',
+                //     description: '',
+                //     keyplayer: '',
+                //     projects: ''
+                // });
+                this.props.navigation.navigate('Profile');
+            })
         })
 
     }
@@ -200,7 +275,7 @@ export default class EditProfile extends Component {
                 <ScrollView>
                     <Card>
                         <CardItem cardBody>
-                            <Image source={{ uri: auth().currentUser.photoURL }} style={{ height: 200, width: null, flex: 1 }} />
+                            <Image source={{ uri: this.state.url ? this.state.url : auth().currentUser.photoURL }} style={{ height: 200, width: null, flex: 1 }} />
 
                         </CardItem>
                         <Button block iconLef style={{ backgroundColor: 'blue' }}
@@ -221,15 +296,8 @@ export default class EditProfile extends Component {
                                         onChangeText={(val) => this.inputValueUpdate(val, 'username')}
                                     />
                                 </View>
-                                {/* <Text>{auth().currentUser.displayName}</Text> */}
                             </Body>
                         </CardItem>
-                        {/* 
-                        <Item fixedLabel last style={styles.row}>
-                        <Label>Destination:</Label>
-                        <Input bordered style={styles.startRouteBtn} placeholder="Please State Your Destination" />
-                        <Icon android name="md-add" size={30} onPress={() => this.addTextInput(this.state.textInput.length)} />
-                    </Item> */}
 
                     </Card>
 

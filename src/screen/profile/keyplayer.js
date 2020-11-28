@@ -30,7 +30,10 @@ import auth from '@react-native-firebase/auth';
 //import firebase from '@react-native-firebase/app';
 import firestore from '@react-native-firebase/firestore';
 import { firebase } from '@react-native-firebase/auth';
+import storage from '@react-native-firebase/storage';
+import ImgToBase64 from 'react-native-image-base64'
 import { Alert } from 'react-native';
+import ImagePicker from 'react-native-image-crop-picker';
 
 console.disableYellowBox = true;
 
@@ -74,29 +77,6 @@ export default class Keyplayer extends Component {
 
     }
 
-
-    // componentDidMount() {
-    //     const profileRef = firestore().collection('User').doc(this.props.navigation.state.params.userkey);
-    //     profileRef.get().then((res) => {
-    //         if (res.exists) {
-    //             const user = res.data();
-    //             this.setState({
-    //                 key: res.id,
-    //                 username: user.username,
-    //                 phonenumber: user.phonenumber,
-    //                 profileImage: user.profileImage,
-    //                 description: user.description,
-    //                 keyplayer: user.keyplayer,
-    //                 project: user.project,
-    //             });
-    //             console.log("state", this.state)
-    //         } else {
-    //             console.log("Whoops! Document does not exists");
-    //         }
-    //     })
-
-
-    // }
 
     //function to add TextInput dynamically
     addTextInput = (index) => {
@@ -199,6 +179,67 @@ export default class Keyplayer extends Component {
         this.setState(state);
     }
 
+    //Pick Image from camera or library
+    pickImage() {
+        ImagePicker.openPicker({
+            width: 300,
+            height: 180,
+            cropping: true
+        }).then(image => {
+            console.log(image, 'image')
+            this.setState({
+                url: image.path,
+                imageType: image.mime
+
+            })
+        }).catch((error) => {
+            console.log(error)
+        })
+    }
+
+
+    uploadImage() {
+        return new Promise((resolve, reject) => {
+            const appendIDToImage = new Date().getTime();
+            const storageRef = storage().ref('thumbnails_job').child(`${appendIDToImage}`);
+
+            // [anas]
+            const task = ImgToBase64.getBase64String(this.state.url)
+                .then(base64String => {
+                    console.log("[uploadImage] Start upload image to firebase storage");
+                    console.log("[uploadImage] base64String", !!base64String);
+
+                    // .put accept blob, putString accept string
+                    // https://firebase.google.com/docs/reference/js/firebase.storage.Reference#put
+                    storageRef.putString(base64String, 'base64')
+                        .then((imageSnapshot) => {
+                            console.log('[uploadImage] Image Upload Successfully');
+
+                            storage()
+                                .ref(imageSnapshot.metadata.fullPath)
+                                .getDownloadURL()
+                                .then((downloadURL) => {
+                                    console.log("[uploadImage] downloadURL", downloadURL);
+                                    // setAllImages((allImages) => [...allImages, downloadURL]);
+                                    //this.dbRef.doc(this).update({ imageURL: downloadURL });
+                                    resolve(downloadURL);
+                                });
+
+                        }).catch(e => {
+                            console.error("[uploadImage] Put storageRef failed");
+                            console.error(e);
+                            reject("");
+                        });
+
+                }).catch(e => {
+                    console.error("[uploadImage] Get base 64 string failed");
+                    console.error(e);
+                    reject("");
+                });
+        });
+    }
+
+
     updateUser = () => {
 
         let keyplayers = [];
@@ -261,10 +302,6 @@ export default class Keyplayer extends Component {
                             </Content>
                         </CardItem>
                     </Card>
-
-
-
-
 
                     <Card>
 

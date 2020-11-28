@@ -39,30 +39,6 @@ export default class Profile extends Component {
         super();
 
 
-        // const user = firebase.auth().currentUser;
-        // user.providerData.forEach((userInfo) => {
-        //     console.log('User info for provider: ', userInfo);
-        // });
-
-        // //if user dh wujud, just alert
-        // if (user == null) {
-        //     firebase.firestore().collection('Users').doc(user.uid).set({
-        //         uid: user.uid,
-        //         username: user.email,
-        //         email: user.email,
-        //         phoneNumber: user.phoneNumber,
-        //         profileImage: user.photoURL
-        //     }).then(() => {
-        //         firebase.firestore().collection('Users').doc(user.uid).get().then(data => { console.log(data) })
-        //     });
-        // } else {
-        //     console.log('Data Already Exist');
-        //     //Alert.alert('Data already exist');
-        // }
-
-        // this.initData = user
-
-
         //firebase.firestore().collection('Users').doc(user.uid).set(user).collection('Job_Creator');
         this.state = {
             users: [],
@@ -102,12 +78,13 @@ export default class Profile extends Component {
     componentDidMount() {
         this.unsubscribe = firebase.firestore().collection('Users').doc(auth().currentUser.uid).onSnapshot(doc => {
             console.log(doc);
-            const { username, phonenumber, profileImage, description, keyplayers, project } = doc.data();
+            const { username, phonenumber, url, profileImage, description, keyplayers, project } = doc.data();
             this.setState({
                 username,
                 description,
                 project,
-                keyplayers
+                keyplayers,
+                url
             })
         });
         //this.unsubscribe = firebase.firestore().collection('Users').onSnapshot(this.getCollection);
@@ -185,7 +162,7 @@ export default class Profile extends Component {
                 <ScrollView>
                     <Card>
                         <CardItem cardBody>
-                            <Image source={{ uri: auth().currentUser.photoURL }} style={{ height: 200, width: null, flex: 1 }} />
+                            <Image source={{ uri: this.state.url ? this.state.url : auth().currentUser.photoURL }} style={{ height: 200, width: null, flex: 1 }} />
 
                         </CardItem>
                         <CardItem>
@@ -234,33 +211,7 @@ export default class Profile extends Component {
                                         </ListItem>
                                     ))
                                 }
-                                <Separator>
-                                    <Text style={{ fontSize: 16 }} onPress={this.setText}>Government</Text>
-                                </Separator>
-                                <ListItem>
-                                    <Text>JKR</Text>
-                                </ListItem>
-                                <ListItem>
-                                    <Text>Jabatan Hasil</Text>
-                                </ListItem>
-                                <ListItem>
-                                    <Text>SPAD</Text>
-                                </ListItem>
-                                <ListItem>
-                                    <Text>HASIL</Text>
-                                </ListItem>
-                                <Separator bordered>
-                                    <Text style={{ fontSize: 16 }}>SME</Text>
-                                </Separator>
-                                <ListItem>
-                                    <Text>Kinematics Business Management Firm</Text>
-                                </ListItem>
-                                <ListItem>
-                                    <Text>Derren Consulting Firm</Text>
-                                </ListItem>
-                                <ListItem>
-                                    <Text>GoRide</Text>
-                                </ListItem>
+
                             </Content>
                         </CardItem>
                     </Card>
@@ -294,36 +245,8 @@ export default class Profile extends Component {
                             ))
                         }
 
-                        <Card style={styles.keyplayer}>
-                            <CardItem style={{ flex: 1, flexDirection: 'column' }}>
-                                <Thumbnail large source={require('../../img/dude.jpg')} style={{ padding: 10 }} />
-                                <Text>Hassan</Text>
-                            </CardItem>
-                            <CardItem cardBody>
-                                <Text>Lead Software Developer</Text>
-                            </CardItem>
-                        </Card>
 
-                        <Card style={styles.keyplayer}>
-                            <CardItem style={{ flex: 1, flexDirection: 'column' }}>
-                                <Thumbnail large source={require('../../img/dude.jpg')} style={{ padding: 10 }} />
-                                <Text>Shah</Text>
-                            </CardItem>
-                            <CardItem cardBody>
-                                <Text>Lead Design Team</Text>
-                            </CardItem>
 
-                        </Card>
-
-                        <Card style={styles.keyplayer}>
-                            <CardItem style={{ flex: 1, flexDirection: 'column' }}>
-                                <Thumbnail large source={require('../../img/dude.jpg')} style={{ padding: 10 }} />
-                                <Text>Rai</Text>
-                            </CardItem>
-                            <CardItem cardBody>
-                                <Text>Admin Officer</Text>
-                            </CardItem>
-                        </Card>
 
 
                     </ScrollView>
