@@ -60,7 +60,8 @@ export default class Keyplayer extends Component {
             jobdesc: '',
             photo: '',
             url: '',
-            imageType: '',
+            urls: [],
+            imageType: [],
             worktype: '',
             salary: '',
             peoplenum: '',
@@ -80,21 +81,31 @@ export default class Keyplayer extends Component {
 
     //function to add TextInput dynamically
     addTextInput = (index) => {
-        let textInput = this.state.textInput;
+        console.log("urls: ", this.state.urls)
+        let textInput = [].concat(this.state.textInput);
+        console.log("urls: ", textInput)
+        // let urls = this.state.urls.filter(v => v.index === index).map(o => o.text)
+        // let url = null;
+        // if (!!urls && urls.length > 0) {
+        //     url = urls[0]
+        // } else {
+        //     url = ""
+        // }
         textInput.push(
             <ScrollView horizontal={true}>
-                <View key={index} style={{ flexDirection: 'row', margin: 5 }}>
+                <View /* key={index} */ style={{ flexDirection: 'row', margin: 5 }}>
 
                     <Card style={styles.keyplayer}>
                         <Icon android name="md-remove" size={30} style={{ marginTop: 30 }} onPress={() => this.removeTextInput()} />
-
                         <CardItem style={{ flex: 1, flexDirection: 'column' }}>
-                            <Button block iconLef style={{ backgroundColor: '#1B6951' }}
-                                onPress={this.pickImage}>
+                            <Button block iconLef style={{ backgroundColor: '#1B6951', marginBottom: 10 }}
+                                onPress={() => this.pickImage(index)}>
                                 <Icon name="md-image" />
                                 <Text style={{ textAlign: 'center' }}>Change Thumbnail</Text>
                             </Button>
-                            <Thumbnail large source={{ uri: this.state.url }} style={{ height: 200, width: null, flex: 1, padding: 10 }} />
+                            {/* <Thumbnail large source={{ uri: url }} style={{ height: 200, width: null, flex: 1, padding: 10 }} /> */}
+                            {/* <Thumbnail large source={{ uri: this.state.url }} style={{ height: 200, width: null, flex: 1, padding: 10 }} /> */}
+                            <Thumbnail large source={{ uri: (this.state.urls.filter(v => v.index === index).length > 0 ? this.state.urls.filter(v => v.index === 0).map(o => o.text)[0] : "") }} style={{ height: 200, width: 300, flex: 1, padding: 10 }} />
                             <TextInput style={styles.startRouteBtn} placeholder="Name of your keyplayer" onChangeText={(text) => this.addValuesName(text, index)} />
                         </CardItem>
                         <CardItem cardBody>
@@ -167,6 +178,30 @@ export default class Keyplayer extends Component {
         }
     }
 
+    addValuesImg = (text, index) => {
+        let dataArray = this.state.inputDataImg;
+        let checkBool = false;
+        if (dataArray.length !== 0) {
+            dataArray.forEach(element => {
+                if (element.index === index) {
+                    element.text = text;
+                    checkBool = true;
+                }
+            });
+        }
+        if (checkBool) {
+            this.setState({
+                inputDataImg: dataArray
+            });
+        }
+        else {
+            dataArray.push({ 'text': text, 'index': index });
+            this.setState({
+                inputDataImg: dataArray
+            });
+        }
+    }
+
     //function to console the output
     getValues = () => {
         console.log('Data', this.state.inputData);
@@ -180,18 +215,52 @@ export default class Keyplayer extends Component {
     }
 
     //Pick Image from camera or library
-    pickImage() {
+    // pickImage() {
+    //     ImagePicker.openPicker({
+    //         width: 300,
+    //         height: 180,
+    //         cropping: true
+    //     }).then(image => {
+    //         console.log(image, 'image')
+    //         this.setState({
+    //             url: image.path,
+    //             imageType: image.mime
+
+    //         })
+    //     }).catch((error) => {
+    //         console.log(error)
+    //     })
+    // }
+
+    pickImage(index) {
         ImagePicker.openPicker({
             width: 300,
             height: 180,
             cropping: true
         }).then(image => {
             console.log(image, 'image')
-            this.setState({
-                url: image.path,
-                imageType: image.mime
 
-            })
+            let dataArray = this.state.urls;
+            let checkBool = false;
+            if (dataArray.length !== 0) {
+                dataArray.forEach(element => {
+                    if (element.index === index) {
+                        element.text = image.path;
+                        checkBool = true;
+                    }
+                });
+            }
+            if (checkBool) {
+                this.setState({
+                    urls: dataArray
+                });
+            }
+            else {
+                dataArray.push({ 'text': image.path, 'index': index });
+                this.setState({
+                    urls: dataArray
+                });
+            }
         }).catch((error) => {
             console.log(error)
         })
@@ -285,13 +354,32 @@ export default class Keyplayer extends Component {
                         </CardItem>
                         <CardItem cardBody>
                             <Content>
+
+                            <ScrollView horizontal={true}>
+                <View /* key={index} */ style={{ flexDirection: 'row', margin: 5 }}>
+
+                    <Card style={styles.keyplayer}>
+                        
+                        <CardItem style={{ flex: 1, flexDirection: 'column' }}>
+                            <Button block iconLef style={{ backgroundColor: '#1B6951', marginBottom: 10 }}
+                                onPress={() => this.pickImage(0)}>
+                                <Icon name="md-image" />
+                                <Text style={{ textAlign: 'center' }}>Change Thumbnail</Text>
+                            </Button>
+                            {/* <Thumbnail large source={{ uri: url }} style={{ height: 200, width: null, flex: 1, padding: 10 }} /> */}
+                            {/* <Thumbnail large source={{ uri: this.state.url }} style={{ height: 200, width: null, flex: 1, padding: 10 }} /> */}
+                            <Thumbnail large source={{ uri: (this.state.urls.filter(v => v.index === 0).length > 0 ? this.state.urls.filter(v => v.index === 0).map(o => o.text)[0] : "") }} style={{ height: 200, width: 300, flex: 1, padding: 10 }} />
+                            <TextInput style={styles.startRouteBtn} placeholder="Name of your keyplayer" onChangeText={(text) => this.addValuesName(text, index)} />
+                        </CardItem>
+                        <CardItem cardBody>
+                            <TextInput style={styles.startRouteBtn} placeholder="Role of your keyplayer" onChangeText={(text) => this.addValuesRole(text, index)} />
+                        </CardItem>
+                    </Card>
+
+                </View>
+            </ScrollView>
+
                                 <View style={styles.inputGroup}>
-                                    {/* <TextInput
-                                        placeholder={'Notable Project'}
-                                        value={this.state.project}
-                                        style={styles.startRouteBtn}
-                                        onChangeText={(val) => this.inputValueUpdate(val, 'project')}
-                                    /> */}
                                     <Icon android name="md-add" size={30} onPress={() => this.addTextInput(this.state.textInput.length)} />
                                     {this.state.textInput.map((value) => {
                                         return value
