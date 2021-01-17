@@ -508,12 +508,12 @@ export default class UploadJob extends Component {
                                 Title="Work Type"
                             >
                                 <Picker.Item label="Select Work Type" value={null} />
-                                <Picker.Item label="Urgent" value="Urgent" />
+                               {/*  <Picker.Item label="Urgent" value="Urgent" /> */}
                                 <Picker.Item label="Part-Time" value="Part-Time" />
                                 <Picker.Item label="Contract" value="Contract" />
-                                <Picker.Item label="Freelance" value="Freelance" />
+                               {/*  <Picker.Item label="Freelance" value="Freelance" />
                                 <Picker.Item label="Milestones" value="Milestones" />
-                                <Picker.Item label="Hire As You Need" value="HireNeed" />
+                                <Picker.Item label="Hire As You Need" value="HireNeed" /> */}
                             </Picker>
                         </Item>
 

@@ -35,8 +35,8 @@ import PaymentDetails from '../payment/PaymentDetails';
 import PastPayment from '../payment/PastPayment';
 const dataArray = [
     { title: "Past Payment", content: <PastPayment /> },
-    { title: "Add New Payment", content: <AddNewScreen /> },
-    { title: "Current Payment", content: <PaymentDetails /> },
+    { title: "Add New Payment Method", content: <AddNewScreen /> },
+    { title: "Current Progress", content: <PaymentDetails /> },
 
 
 ];
