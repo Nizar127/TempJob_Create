@@ -8,6 +8,7 @@ buildscript {
         targetSdkVersion = 29
         playServicesVersion = "17.0.0" // or set latest version
         androidMapsUtilsVersion = "0.62"
+        firebaseMessagingVersion = "+" // default: "+"
     }
     repositories {
         google()

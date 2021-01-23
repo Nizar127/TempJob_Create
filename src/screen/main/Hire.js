@@ -32,7 +32,7 @@ import auth from '@react-native-firebase/auth';
 //import TimePicker from 'react-native-simple-time-picker';
 import TimePicker from "react-native-24h-timepicker";
 import { KeyboardAvoidingViewBase } from 'react-native';
-
+import PushNotification from "react-native-push-notification";
 
 export default class Hire extends Component {
 
@@ -89,7 +89,12 @@ export default class Hire extends Component {
     componentDidMount() {
         this.unsubscribe = this.applicationRef.onSnapshot(this.getCollection);
         //let DataRef = firestore().collection('Hiring').doc(auth().currentUser.uid).get().then(documentSnapshot => this.getDataOfJob(documentSnapshot));
-
+        PushNotification.localNotificationSchedule({
+            //... You can use all the options from localNotifications
+            message: "My Notification Message", // (required)
+            date: new Date(Date.now() + 10 * 1000), // in 60 secs
+            allowWhileIdle: false, // (optional) set notification to work while on doze, default: false
+          });
 
     }
 
@@ -285,6 +290,9 @@ export default class Hire extends Component {
         });
 
     }
+
+
+    
 
     render() {
 
