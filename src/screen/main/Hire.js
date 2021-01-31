@@ -157,6 +157,7 @@ export default class Hire extends Component {
 
     displayModal(show) {
         this.setState({ isVisible: show })
+        console.log("display modal + show", show)
     }
 
     setPeriod = (value) => {
