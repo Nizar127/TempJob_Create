@@ -68,6 +68,41 @@ export default class UserProfile extends Component {
     showActionSheet = () => {
         this.ActionSheet.show()
     }
+
+    _maybeRenderImage = () => {
+        let { url } = this.state;
+        if (!url) {
+          return;
+        }
+    
+        return (
+          <View
+            style={{
+              marginTop: 10,
+              marginBottom: 10,
+              width: 350,
+              height: 250,
+              borderRadius: 3,
+              elevation: 2,
+            }}>
+            <View
+              style={{
+                borderTopRightRadius: 3,
+                borderTopLeftRadius: 3,
+                shadowColor: '#8d8f92',
+                borderColor: '#8d8f92',
+                elevation: 4,
+                borderWidth:5,
+                shadowOpacity: 0.2,
+                shadowOffset: { width: 4, height: 4 },
+                shadowRadius: 5,
+                overflow: 'hidden',
+              }}>
+              <Image source={{ uri: url }} style={{ width: null, height: 250 }} />
+            </View>
+          </View>
+        );
+    };
     // displayModal(show) {
     //     this.setState({ isVisible: show })
     // }
@@ -160,6 +195,70 @@ export default class UserProfile extends Component {
 
                         </Content>
 
+                    </View>
+                    <View style={{padding:10, borderTopWidth: 1,}}>
+                        <Text style={{padding: 15, fontSize: 20, fontWeight: 'bold', fontFamily: 'montserrat'}}>Review</Text>
+                        <Content style={{padding: 5, marginBottom:10}}>
+                            <View style={{flex: 1, flexDirection: 'row'}}>
+                            <CardItem style={{ marginTop: 18, justifyContent: 'center'}} >
+                                <Thumbnail large source={require('../../img/kambing.jpg')} style={{ alignSelf: 'center' }} />
+                            </CardItem>
+                            <View style={{ flex: 1, flexDirection: 'column'}}>
+                                <View 
+                                    style=
+                                    {{flex: 1, flexDirection: 'column', marginTop: 20,
+                                    borderTopRightRadius: 3,
+                                    borderTopLeftRadius: 3,
+                                    shadowColor: '#8d8f92',
+                                    borderColor: '#8d8f92',
+                                    elevation: 4,
+                                    borderWidth:2,
+                                    shadowOpacity: 0.2,
+                                    shadowOffset: { width: 3, height: 4 },
+                                    shadowRadius: 5,
+                                    overflow: 'hidden',}}> 
+                                    <Text style={{ fontSize: 17, padding: 10, justifyContent: 'center'}}>
+                                        sds
+                                    </Text>
+                                
+                                </View>
+                                <View style={{flexDirection: 'row', justifyContent:'flex-end' }}>
+                                    <View style={Style.rating}>
+                                        <Icon name="star" color="rgb(255, 56, 92)" />
+                                        <Icon name="star" color="rgb(255, 56, 92)" />
+                                        <Icon name="star" color="rgb(255, 56, 92)" />
+                                        <Icon name="star" color="rgb(255, 56, 92)" />
+                                    <Text style={Style.ratingLabel}>
+
+                                    </Text>
+                               </View>
+                                <Button primary style={{margin:10}}>
+                                    <Text>REPLY</Text>
+                                </Button>
+                                </View>
+                         
+                            </View>
+                            </View>
+                 
+                        </Content>
+                        <Content>
+                            <View style={{flex: 1, flexDirection: 'row', borderTopWidth: 1, marginTop: 10, marginBottom: 10}}>
+                            <CardItem style={{ marginTop: 18, justifyContent: 'center' }} >
+                                <Thumbnail large source={require('../../img/kambing.jpg')} style={{ alignSelf: 'center' }} />
+                            </CardItem>
+                            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center'}}> 
+                                <Text style={{ fontSize: 17, padding: 10, justifyContent: 'center'}}>
+                                    Tkdaskdajkdaskdjskadasdksadjkasd
+                                </Text>
+                               {/*  <View style={{flexDirection: 'row', marginLeft:20}}>
+                                    <Text onPress={() => this.props.navigation.navigate('PastPayment')} style={{color: '#092FEC', fontWeight: 'bold', padding: 3 }}>Reply</Text>
+                                    <Text onPress={() => this.props.navigation.navigate('PastPayment')} style={{color: '#092FEC', fontWeight: 'bold', padding: 3}}>Like</Text>
+                                </View> */}
+                            </View>
+
+                            </View>
+                 
+                        </Content>
                     </View>
 
                 </ScrollView>

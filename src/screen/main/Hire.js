@@ -32,6 +32,8 @@ import auth from '@react-native-firebase/auth';
 //import TimePicker from 'react-native-simple-time-picker';
 import TimePicker from "react-native-24h-timepicker";
 import { KeyboardAvoidingViewBase } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
+
 
 
 export default class Hire extends Component {
@@ -82,6 +84,7 @@ export default class Hire extends Component {
     }
 
 
+
     getDataOfJob = (documentSnapshot) => {
         return documentSnapshot.get('jobCreatorID')
     }
@@ -89,8 +92,35 @@ export default class Hire extends Component {
     componentDidMount() {
         this.unsubscribe = this.applicationRef.onSnapshot(this.getCollection);
         //let DataRef = firestore().collection('Hiring').doc(auth().currentUser.uid).get().then(documentSnapshot => this.getDataOfJob(documentSnapshot));
+        const unsubscribe = messaging().onMessage(async remoteMessage => {
+            Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+          });
+      
+      
 
-
+          messaging().onNotificationOpenedApp(remoteMessage => {
+            console.log(
+              'Notification caused app to open from background state:',
+              remoteMessage.notification,
+            );
+            navigation.navigate(remoteMessage.data.type);
+          });
+      
+          // Check whether an initial notification is available
+          messaging()
+            .getInitialNotification()
+            .then(remoteMessage => {
+              if (remoteMessage) {
+                console.log(
+                  'Notification caused app to open from quit state:',
+                  remoteMessage.notification,
+                );
+                setInitialRoute(remoteMessage.data.type); // e.g. "Settings"
+              }
+              setLoading(false);
+            });
+            
+            return unsubscribe;
     }
 
 
@@ -157,7 +187,7 @@ export default class Hire extends Component {
 
     displayModal(show) {
         this.setState({ isVisible: show })
-        console.log("display modal + show", show)
+        
     }
 
     setPeriod = (value) => {

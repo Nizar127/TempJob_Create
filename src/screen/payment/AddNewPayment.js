@@ -20,9 +20,31 @@ export default class AddNewPayment extends PureComponent {
     handleCardPayPress = async () => {
         try {
             this.setState({ loading: true, token: null })
+
+            const params = {
+                // mandatory
+                number: '4242424242424242',
+                expMonth: 11,
+                expYear: 25,
+                cvc: '223',
+                // optional
+                name: 'Test User',
+                currency: 'usd',
+                addressLine1: '123 Test Street',
+                addressLine2: 'Apt. 5',
+                addressCity: 'Test City',
+                addressState: 'Test State',
+                addressCountry: 'Test Country',
+                addressZip: '55555',
+              }
+              
+              const token2 = await stripe.createTokenWithCard(params)
+              console.log("token2",token2)
+
+
             const token = await stripe.paymentRequestWithCardForm({
                 // Only iOS support this options
-                smsAutofillDisabled: true,
+               //smsAutofillDisabled: true,
                 requiredBillingAddressFields: 'full',
                 prefilledInformation: {
                     billingAddress: {
@@ -38,11 +60,43 @@ export default class AddNewPayment extends PureComponent {
                 },
             })
 
-            this.setState({ loading: false, token })
+            
+            this.setState({ loading: false, token:token2})
         } catch (error) {
+            console.log("error", error)
             this.setState({ loading: false })
         }
     }
+
+   /*  https://us-central1-getjob-8c6bc.cloudfunctions.net/payWithStripe */
+    
+    doPayment = async () => {
+        console.log("doPayment")
+        fetch('http://192.168.0.145:5000/getjob-8c6bc/us-central1/payWithStripe',
+
+         {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: 100,
+            currency: "usd",
+            token: this.state.token
+          }),
+        })
+          .then((response) => {
+              console.log("response", response);
+              return response.json();
+          })
+          .then((responseJson) => {
+            console.log(responseJson);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
 
     render() {
         const { loading, token } = this.state
@@ -62,6 +116,12 @@ export default class AddNewPayment extends PureComponent {
                         text="Enter you card and pay"
                         loading={loading}
                         onPress={this.handleCardPayPress}
+                    />
+
+                    <Button
+                        text="Make Payment"
+                        loading={loading}
+                        onPress={this.doPayment}
                     />
                     <View
                         style={styles.token}

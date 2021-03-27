@@ -156,9 +156,9 @@ export default class Profile extends Component {
 
     render() {
         return (
-            // this.state.users.map((item, index) => {
-            //     return (
-            <View style={{ flex: 1 }} /* key={index} */>
+            //  this.state.users.map((item, index) => {
+                // return (
+            <View style={{ flex: 1 }}  /* key={index} */ >
                 <ScrollView>
                     <Card>
                         <CardItem cardBody>
@@ -216,15 +216,6 @@ export default class Profile extends Component {
                         </CardItem>
                     </Card>
 
-                    {/* <Card>
-                                <CardItem header>
-                                    <Text>Task List</Text>
-                                </CardItem>
-                                <CardItem cardBody button onPress={() => this.props.navigation.navigate('TaskList')}>
-                                    <Text style={{ justifyContent: 'center' }}>View Task</Text>
-                                </CardItem>
-                            </Card> */}
-
                     <CardItem header bordered>
                         <Text>Key Player</Text>
                     </CardItem>
@@ -258,10 +249,9 @@ export default class Profile extends Component {
                     <Card>
 
                         <Button block primary last style={{ marginTop: 20, marginBottom: 5 }} onPress={() => {
-                            this.props.navigation.navigate('EditProfile')/* , {
+                            this.props.navigation.navigate('EditProfile') /* {
                                 userkey: item.key
-                            }); */
-                        }}>
+                            }); */ }}>
                             <Text style={{ fontSize: 18, fontWeight: 'bold', fontFamily: 'montserrat' }}>Edit Profile</Text>
                         </Button>
 
@@ -270,10 +260,10 @@ export default class Profile extends Component {
                 </ScrollView>
 
             </View>
-            //     )
+                 )
 
-            // })
-        )
+            //  })
+        //)
     }
 }
 
