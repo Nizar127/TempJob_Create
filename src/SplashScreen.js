@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
     View,
@@ -12,11 +11,30 @@ import {
 import * as Animatable from 'react-native-animatable';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import messaging from '@react-native-firebase/messaging';
+
+async function requestUserPermission() {
+  const authStatus = await messaging().requestPermission();
+  const enabled =
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+  if (enabled) {
+    console.log('Authorization status:', authStatus);
+    const token = await messaging().getToken();
+      console.log('Token', token)
+  }
+}
+
 //import { useTheme } from '@react-navigation/native';
 console.disableYellowBox = true;
 
 
 const SplashScreen = ({ navigation }) => {
+
+    requestUserPermission().then(() =>
+     console.log("request user permission completed"))
+     .catch(e => console.error("request user permission failed", e))
     //const { colors } = useTheme();
 
     return (

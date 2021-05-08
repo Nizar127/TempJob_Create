@@ -29,6 +29,7 @@ import PaymentDetails from './src/screen/payment/PaymentDetails';
 import PaidNow from './src/screen/payment/PaidNow';
 import auth from '@react-native-firebase/auth';
 
+
 const DashboardTabNavigator = createBottomTabNavigator(
   {
     Hire: Hire,

@@ -96,8 +96,6 @@ export default class Hire extends Component {
             Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
           });
       
-      
-
           messaging().onNotificationOpenedApp(remoteMessage => {
             console.log(
               'Notification caused app to open from background state:',
